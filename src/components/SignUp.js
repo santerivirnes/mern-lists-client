@@ -1,76 +1,146 @@
 import React from 'react'
-import shortid from 'shortid';
-import axios from 'axios';
-
+import { Button, Input } from '@material-ui/core';
 export default class SignUp extends React.Component {
-    state = {
-        email:"",
-        password:"",
-        firstName:"",
-        lastName:""
+    constructor(props){
+        super(props);
+        this.state = {
+            signUpError: "",
+            signUpFirstName:"",
+            signUpLastName:"",
+            signUpEmail:"",
+            signUpPassword:""
     };
+
+    this.onTextboxChangeSignUpEmail = this.onTextboxChangeSignUpEmail.bind(this);
+    this.onTextboxChangeSignUpFirstName = this.onTextboxChangeSignUpFirstName.bind(this);
+    this.onTextboxChangeSignUpLastName = this.onTextboxChangeSignUpLastName.bind(this);
+    this.onTextboxChangeSignUpPassword = this.onTextboxChangeSignUpPassword.bind(this);
+    
+    this.onSignUp = this.onSignUp.bind(this);
+}
+
+onTextboxChangeSignUpEmail(event) {
+    this.setState({
+        signUpEmail: event.target.value,
+    })
+}
+onTextboxChangeSignUpPassword(event) {
+    this.setState({
+        signUpPassword: event.target.value,
+    })
+}
+onTextboxChangeSignUpFirstName(event) {
+    this.setState({
+        signUpFirstName: event.target.value,
+    })
+}
+onTextboxChangeSignUpLastName(event) {
+    this.setState({
+        signUpLastName: event.target.value,
+    })
+}
+
+onSignUp() {
+    const {
+        signUpFirstName,
+        signUpLastName,
+        signUpEmail,
+        signUpPassword
+    } = this.state;
+
+    fetch("http://localhost:3001/api/signup", {
+        method: "POST",
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            firstName: signUpFirstName,
+            lastName: signUpLastName,
+            email: signUpEmail,
+            password: signUpPassword
+        }),
+    }).then(res => res.json())
+      .then(json => {
+            
+            if(json.success){
+                this.setState({
+                    signUpError: json.message,
+                    isLoading: false,
+                    signUpEmail: "",
+                    signUpFirstName: "",
+                    signUpLastName:"",
+                    signUpPassword:""
+                    
+                })
+            } else {
+                this.setState({
+                    signUpError: json.message,
+                    isLoading: false,
+                })
+            }
+    });
+}
+
 
     
 
-
-    handleChange = event => {
-        this.setState({
-          [event.target.name]: event.target.value
-        })
-      };
-
-
-    handleSubmit = event => {
-        event.preventDefault()
-        axios.post('http://localhost:3001/api/putUser', {
-            id: shortid.generate(),
-            email: this.state.email,
-            password: this.state.password,
-            firstName: this.state.firstName,
-            lastName: this.state.lastName
-        })
-        this.setState({
-            id:"",
-            email:"",
-            password:"",
-            firstName:"",
-            lastName:""
-        })
-    }
-
-    // putUserToDB = (state) => {
-    //     axios.post('http://localhost:3001/api/putUser', {
-    //       id: shortid.generate(),
-    //       email: state.email,
-    //       firstName: state.firstName,
-    //       lastName: state.lastName,
-    //       password: state.password
-    //     });
-    //   };
-
     render() {
+        const{
+            signUpFirstName,
+            signUpLastName,
+            signUpEmail,
+            signUpPassword,
+            signUpError
+        } = this.state;
         return (
             <div className="container">
+                {
+                    (signUpError) ? (
+                        <p>{signUpError}</p>
+                    ) : (null)
+                }
                 <form onSubmit={this.handleSubmit} className="white">
-                    <h5 className="grey-text text-darken-3">Sign in</h5>
+                    <h5 className="grey-text text-darken-3">Sign up</h5>
                     <div className="input-filed">
                         <label htmlFor="email">Email</label>
-                        <input type="email" name="email" value={this.state.email} id="email" onChange={this.handleChange} />
+                        <Input 
+                            type="email" 
+                            name="signUpEmail" 
+                            value={signUpEmail} 
+                            id="email" 
+                            onChange={this.onTextboxChangeSignUpEmail} 
+                        />
                     </div>
                     <div className="input-filed">
                         <label htmlFor="password">Password</label>
-                        <input name="password" type="password" value={this.state.password} id="password" onChange={this.handleChange} />
+                        <Input 
+                            name="signUpPassword" 
+                            type="password" 
+                            value={signUpPassword} 
+                            id="password" 
+                            onChange={this.onTextboxChangeSignUpPassword} 
+                        />
                     </div>
                     <div className="input-filed">
                         <label htmlFor="firstName">Etunimi</label>
-                        <input type="text" name="firstName" value={this.state.firstName} id="firstName" onChange={this.handleChange} />
+                        <Input 
+                            type="text" 
+                            name="signUpFirstName" 
+                            value={signUpFirstName} 
+                            id="firstName" 
+                            onChange={this.onTextboxChangeSignUpFirstName} 
+                        />
                     </div>
                     <div className="input-filed">
                         <label htmlFor="lastName">Sukunimi</label>
-                        <input type="lastName" name="lastName" value={this.state.lastName} id="lastName" onChange={this.handleChange} />
+                        <Input 
+                            type="signUpLastName" 
+                            name="lastName" 
+                            value={signUpLastName} 
+                            id="lastName" 
+                            onChange={this.onTextboxChangeSignUpLastName} 
+                        />
                     </div>
                     <div className="input-filed">
-                        <button type="submit" onClick={this.handleSubmit} className="btn punk lighten-1 z-depth-0">Kirjaudu</button>
+                        <Button type="submit" onClick={this.onSignUp}>Kirjaudu</Button>
                     </div>
                 </form>
             </div>
